@@ -2,6 +2,17 @@ language: rust
 rust:
 - nightly
 
+addons:
+  apt:
+    packages:
+    - clang
+    - make
+    - pkg-config
+    - nettle-dev
+    - libssl-dev
+    - capnproto
+    - libsqlite3-dev
+
 before_script:
 - rustup component add rustfmt-preview
 
