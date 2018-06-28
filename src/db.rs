@@ -16,7 +16,6 @@ pub struct Key {
     pub pgpkey: String,
 }
 
-
 type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 pub fn init_pool() -> Pool {
@@ -25,9 +24,8 @@ pub fn init_pool() -> Pool {
 }
 
 fn database_url() -> String {
-        env::var("DATABASE_URL").expect("DATABASE_URL must be set")
+    env::var("DATABASE_URL").expect("DATABASE_URL must be set")
 }
-
 
 pub struct DbConn(pub r2d2::PooledConnection<ConnectionManager<PgConnection>>);
 
@@ -51,8 +49,7 @@ impl Deref for DbConn {
     }
 }
 
-
-pub fn all(connection: &PgConnection) -> QueryResult<Vec<Key>> {
+pub fn _all(connection: &PgConnection) -> QueryResult<Vec<Key>> {
     keys::table.load::<Key>(&*connection)
 }
 
@@ -66,7 +63,7 @@ pub fn insert(key: Key, connection: &PgConnection) -> QueryResult<Key> {
         .get_result(connection)
 }
 
-pub fn update(fingerprint: String, key: Key, connection: &PgConnection) -> QueryResult<Key> {
+pub fn _update(fingerprint: String, key: Key, connection: &PgConnection) -> QueryResult<Key> {
     diesel::update(keys::table.find(fingerprint))
         .set(&key)
         .get_result(connection)
