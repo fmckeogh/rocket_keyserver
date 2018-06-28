@@ -149,17 +149,17 @@ mod test {
         ).expect("valid rocket instance");
 
         db::delete(
-            UPLOAD_TEST_FINGERPRINT.to_string(),
+            _UPLOAD_TEST_FINGERPRINT.to_string(),
             &init_pool().get().unwrap(),
         ).unwrap();
 
-        let mut response = client.post("/").body(UPLOAD_TEST_KEY).dispatch();
+        let mut response = client.post("/").body(_UPLOAD_TEST_KEY).dispatch();
 
         assert_eq!(response.status(), Status::Ok);
-        assert_eq!(response.body_string(), Some(UPLOAD_TEST_URL.to_string()));
+        assert_eq!(response.body_string(), Some(_UPLOAD_TEST_URL.to_string()));
 
         db::delete(
-            UPLOAD_TEST_FINGERPRINT.to_string(),
+            _UPLOAD_TEST_FINGERPRINT.to_string(),
             &init_pool().get().unwrap(),
         ).unwrap();
     }
@@ -173,21 +173,21 @@ mod test {
         ).expect("valid rocket instance");
 
         db::delete(
-            RETRIEVE_TEST_FINGERPRINT.to_string(),
+            _RETRIEVE_TEST_FINGERPRINT.to_string(),
             &init_pool().get().unwrap(),
         ).unwrap();
 
-        let mut response = client.post("/").body(RETRIEVE_TEST_KEY).dispatch();
+        let mut response = client.post("/").body(_RETRIEVE_TEST_KEY).dispatch();
 
         let mut response = client
             .get(URI::new(response.body_string().unwrap()))
             .dispatch();
 
         assert_eq!(response.status(), Status::Ok);
-        assert_eq!(response.body_string(), Some(RETRIEVE_TEST_BODY.to_string()));
+        assert_eq!(response.body_string(), Some(_RETRIEVE_TEST_BODY.to_string()));
 
         db::delete(
-            RETRIEVE_TEST_FINGERPRINT.to_string(),
+            _RETRIEVE_TEST_FINGERPRINT.to_string(),
             &init_pool().get().unwrap(),
         ).unwrap();
     }
