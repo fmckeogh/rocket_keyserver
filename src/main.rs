@@ -71,12 +71,13 @@ fn retrieve(fingerprint: String, connection: DbConn) -> io::Result<String> {
 
     let mut key_output = String::new();
 
-    write!(&mut key_output, "Fingerprint: {}\n\n", tpk.fingerprint()).unwrap();
+    writeln!(&mut key_output, "Fingerprint: {}", tpk.fingerprint()).unwrap();
+    writeln!(&mut key_output).unwrap();
 
     for (i, u) in tpk.userids().enumerate() {
-        write!(
+        writeln!(
             &mut key_output,
-            "{}: UID: {}, {} self-signature(s), {} certification(s)\n",
+            "{}: UID: {}, {} self-signature(s), {} certification(s)",
             i,
             u.userid(),
             u.selfsigs().count(),
@@ -84,12 +85,12 @@ fn retrieve(fingerprint: String, connection: DbConn) -> io::Result<String> {
         ).unwrap();
     }
 
-    write!(&mut key_output, "\n").unwrap();
+    writeln!(&mut key_output).unwrap();
 
     for (i, s) in tpk.subkeys().enumerate() {
-        write!(
+        writeln!(
             &mut key_output,
-            "{}: Fingerprint: {}, {} self-signature(s), {} certification(s)\n",
+            "{}: Fingerprint: {}, {} self-signature(s), {} certification(s)",
             i,
             s.subkey().fingerprint(),
             s.selfsigs().count(),
@@ -152,10 +153,7 @@ mod test {
             &init_pool().get().unwrap(),
         ).unwrap();
 
-        let mut response = client
-            .post("/")
-            .body(UPLOAD_TEST_KEY)
-            .dispatch();
+        let mut response = client.post("/").body(UPLOAD_TEST_KEY).dispatch();
 
         assert_eq!(response.status(), Status::Ok);
         assert_eq!(response.body_string(), Some(UPLOAD_TEST_URL.to_string()));
@@ -174,7 +172,10 @@ mod test {
                 .mount("/", routes![index, upload, retrieve]),
         ).expect("valid rocket instance");
 
-        db::delete(RETRIEVE_TEST_FINGERPRINT.to_string(), &init_pool().get().unwrap()).unwrap();
+        db::delete(
+            RETRIEVE_TEST_FINGERPRINT.to_string(),
+            &init_pool().get().unwrap(),
+        ).unwrap();
 
         let mut response = client.post("/").body(RETRIEVE_TEST_KEY).dispatch();
 
@@ -185,7 +186,10 @@ mod test {
         assert_eq!(response.status(), Status::Ok);
         assert_eq!(response.body_string(), Some(RETRIEVE_TEST_BODY.to_string()));
 
-        db::delete(RETRIEVE_TEST_FINGERPRINT.to_string(), &init_pool().get().unwrap()).unwrap();
+        db::delete(
+            RETRIEVE_TEST_FINGERPRINT.to_string(),
+            &init_pool().get().unwrap(),
+        ).unwrap();
     }
 
 }
