@@ -1,0 +1,27 @@
+[package]
+name = "rocket_keyserver"
+version = "0.1.0"
+authors = ["Ferdia McKeogh <ferdia@mckeogh.tech>"]
+
+[dependencies]
+rocket = "0.3.14"
+rocket_codegen = "0.3.14"
+time = "0.1.40"
+r2d2 = "0.8.2"
+r2d2-diesel = "1.0.0"
+serde = "1.0.67"
+dotenv = "0.13.0"
+serde_derive = "1.0.67"
+hex = "0.3.2"
+
+[dependencies.diesel]
+version = "1.3.2"
+features = ["postgres", "r2d2"]
+
+[dependencies.diesel_codegen]
+version = "0.16.1"
+features = ["postgres"]
+
+[dependencies.openpgp]
+git = "https://gitlab.com/sequoia-pgp/sequoia.git"
+rev = "59642412"

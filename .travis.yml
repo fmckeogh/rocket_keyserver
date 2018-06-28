@@ -1,0 +1,22 @@
+language: rust
+rust:
+- nightly
+
+before_script:
+- rustup component add rustfmt-preview
+
+script:
+  - cargo fmt --all -- --check
+  - cargo test
+  - cargo check
+  - cargo build
+  - cargo build --release
+
+cache: cargo
+
+before_cache:
+  - chmod -R a+r $HOME/.cargo
+
+notifications:
+  email:
+    on_success: never
