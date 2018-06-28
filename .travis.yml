@@ -19,6 +19,7 @@ addons:
 
 before_install:
 - rustup component add rustfmt-preview
+- cargo install clippy
 - git clone https://git.lysator.liu.se/nettle/nettle.git
 - cd nettle
 - git checkout 0d993096
