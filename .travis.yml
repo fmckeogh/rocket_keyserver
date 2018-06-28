@@ -29,9 +29,10 @@ before_install:
 
 script:
   - cargo fmt --all -- --check
-  - cargo test
+  - cargo clippy
   - cargo check
-  - cargo build --release
+#  - cargo test
+#  - cargo build --release
 
 cache:
   - cargo

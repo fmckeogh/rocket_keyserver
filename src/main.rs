@@ -184,7 +184,10 @@ mod test {
             .dispatch();
 
         assert_eq!(response.status(), Status::Ok);
-        assert_eq!(response.body_string(), Some(_RETRIEVE_TEST_BODY.to_string()));
+        assert_eq!(
+            response.body_string(),
+            Some(_RETRIEVE_TEST_BODY.to_string())
+        );
 
         db::delete(
             _RETRIEVE_TEST_FINGERPRINT.to_string(),
