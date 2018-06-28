@@ -69,6 +69,6 @@ pub fn _update(fingerprint: String, key: Key, connection: &PgConnection) -> Quer
         .get_result(connection)
 }
 
-pub fn _delete(fingerprint: String, connection: &PgConnection) -> QueryResult<usize> {
+pub fn delete(fingerprint: String, connection: &PgConnection) -> QueryResult<usize> {
     diesel::delete(keys::table.find(fingerprint)).execute(connection)
 }
