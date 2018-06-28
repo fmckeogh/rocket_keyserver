@@ -13,7 +13,6 @@ addons:
     - make
     - pkg-config
     - libssl-dev
-    - nettle-dev
     - capnproto
     - libsqlite3-dev
     - libpq-dev
@@ -22,6 +21,7 @@ before_install:
 - rustup component add rustfmt-preview
 - git clone https://git.lysator.liu.se/nettle/nettle.git
 - cd nettle
+- git checkout 0d993096
 - ./.bootstrap
 - ./configure
 - make
