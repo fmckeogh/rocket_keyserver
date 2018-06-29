@@ -30,20 +30,20 @@ fn index() -> &'static str {
     "
     USAGE:
 
-    POST /
+        POST /
 
-          Accepts public PGP key in the request body and responds with URL of page containing public PGP key
+            Accepts public PGP key in the request body and responds with URL of page containing public PGP key
 
-    GET /<fingerprint>
+        GET /<fingerprint>
 
-          retrieves the 40-byte public PGP key with fingerprint `<fingerprint>`
+            Retrieves the 40-byte public PGP key metadata with fingerprint `<fingerprint>`
     "
 }
 
 #[post("/", data = "<data>")]
 fn upload(data: Data, connection: DbConn) -> io::Result<String> {
     let mut key_string = String::new();
-    data.open().read_to_string(&mut key_string).unwrap();
+    data.open().read_to_string(&mut key_string)?;
 
     let tpk = openpgp::TPK::from_reader(armored!(key_string)).unwrap();
 
@@ -127,28 +127,29 @@ mod test {
         let mut response = client.get("/").dispatch();
 
         assert_eq!(response.status(), Status::Ok);
-        assert_eq!(response.body_string(), Some("
+        assert_eq!(response.body_string(), Some(
+        "
     USAGE:
 
-    POST /
+        POST /
 
-          Accepts public PGP key in the request body and responds with URL of page containing public PGP key
+            Accepts public PGP key in the request body and responds with URL of page containing public PGP key
 
-    GET /<fingerprint>
+        GET /<fingerprint>
 
-          retrieves the 40-byte public PGP key with fingerprint `<fingerprint>`
+            Retrieves the 40-byte public PGP key metadata with fingerprint `<fingerprint>`
     ".into()));
     }
 
     #[test]
-    fn upload_test() {
+    fn upload_test_success() {
         let client = Client::new(
             rocket::ignite()
                 .manage(init_pool())
                 .mount("/", routes![index, upload, retrieve]),
         ).expect("valid rocket instance");
 
-        db::delete(
+        db::_delete(
             _UPLOAD_TEST_FINGERPRINT.to_string(),
             &init_pool().get().unwrap(),
         ).unwrap();
@@ -158,14 +159,15 @@ mod test {
         assert_eq!(response.status(), Status::Ok);
         assert_eq!(response.body_string(), Some(_UPLOAD_TEST_URL.to_string()));
 
-        db::delete(
+        db::_delete(
             _UPLOAD_TEST_FINGERPRINT.to_string(),
             &init_pool().get().unwrap(),
         ).unwrap();
     }
 
+    /*
     #[test]
-    fn retrieve_test() {
+    fn upload_test_bad_key() {
         let client = Client::new(
             rocket::ignite()
                 .manage(init_pool())
@@ -173,6 +175,31 @@ mod test {
         ).expect("valid rocket instance");
 
         db::delete(
+            _UPLOAD_TEST_FINGERPRINT.to_string(),
+            &init_pool().get().unwrap(),
+        ).unwrap();
+
+        let mut response = client.post("/").body(_UPLOAD_TEST_KEY[..60]).dispatch();
+
+        assert_eq!(response.status(), Status::Ok);
+        assert_eq!(response.body_string(), Some(_UPLOAD_TEST_URL.to_string()));
+
+        db::delete(
+            _UPLOAD_TEST_FINGERPRINT.to_string(),
+            &init_pool().get().unwrap(),
+        ).unwrap();
+    }
+    */
+
+    #[test]
+    fn retrieve_test_success() {
+        let client = Client::new(
+            rocket::ignite()
+                .manage(init_pool())
+                .mount("/", routes![index, upload, retrieve]),
+        ).expect("valid rocket instance");
+
+        db::_delete(
             _RETRIEVE_TEST_FINGERPRINT.to_string(),
             &init_pool().get().unwrap(),
         ).unwrap();
@@ -189,10 +216,9 @@ mod test {
             Some(_RETRIEVE_TEST_BODY.to_string())
         );
 
-        db::delete(
+        db::_delete(
             _RETRIEVE_TEST_FINGERPRINT.to_string(),
             &init_pool().get().unwrap(),
         ).unwrap();
     }
-
 }

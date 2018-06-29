@@ -1,9 +1,12 @@
+sudo: required
+
 language: rust
 rust:
 - nightly
 
 services:
   - postgresql
+  - docker
 
 addons:
   apt:
@@ -32,6 +35,7 @@ script:
   - cargo fmt --all -- --check
   - cargo clippy
   - cargo check
+  - docker build .
 #  - cargo test
 #  - cargo build --release
 
