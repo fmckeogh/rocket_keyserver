@@ -23,4 +23,4 @@ RUN cargo build --release
 
 RUN cargo install diesel_cli --no-default-features --features postgres
 
-CMD ["sh /etc/init.d/postgresql restart && diesel setup && ./target/release/rocket_keyserver"]
+CMD ["/bin/bash -c "/etc/init.d/postgresql restart && diesel setup && /target/release/rocket_keyserver""]
