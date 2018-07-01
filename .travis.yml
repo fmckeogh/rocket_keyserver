@@ -36,7 +36,7 @@ script:
   - cargo fmt --all -- --check
   - cargo clippy
   - cargo check
-  - docker-compose -f docker-compose.ci.yml up
+  - ./.docker.ci.sh
 #  - cargo test
 #  - cargo build --release
 
