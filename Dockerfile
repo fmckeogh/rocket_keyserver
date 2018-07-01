@@ -13,14 +13,14 @@ RUN /root/.cargo/bin/cargo install diesel_cli --no-default-features --features p
 
 ENV DATABASE_URL postgres://postgres:password@db/keys
 
-RUN USER=root /root/.cargo/bin/cargo new --bin rocket_keyserver
+#RUN USER=root /root/.cargo/bin/cargo new --bin rocket_keyserver
 WORKDIR /rocket_keyserver
 
-COPY ./Cargo.lock ./Cargo.lock
-COPY ./Cargo.toml ./Cargo.toml
+#COPY ./Cargo.lock ./Cargo.lock
+#COPY ./Cargo.toml ./Cargo.toml
 
-RUN /root/.cargo/bin/cargo build --release
-RUN rm src/*.rs
+#RUN /root/.cargo/bin/cargo build --release
+#RUN rm -r src
 
 COPY ./ ./
 RUN /root/.cargo/bin/cargo build --release
@@ -32,8 +32,8 @@ COPY --from=build /rocket_keyserver/ /
 COPY --from=build /rocket_keyserver/target/release/rocket_keyserver /rocket_keyserver
 COPY --from=build /root/.cargo/bin/diesel /diesel
 
-ADD https://raw.githubusercontent.com/eficode/wait-for/master/wait-for wait-for
-RUN chmod +x wait-for
+ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh wait-for-it.sh
+RUN chmod +x wait-for-it.sh
 
 RUN apt-get update
 RUN apt-get install -y nettle-dev libpq-dev
@@ -43,4 +43,4 @@ EXPOSE 443
 
 ENV ROCKET_ENV prod
 ENV DATABASE_URL postgres://postgres:password@db/keys
-CMD ["sh", "-c", "./wait-for db:5432; /diesel setup; /rocket_keyserver"]
+CMD ["sh", "-c", "./wait-for-it.sh db:5432 -- /diesel setup && /rocket_keyserver"]
