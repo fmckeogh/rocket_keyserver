@@ -1,7 +1,7 @@
 # rocket_keyserver
 > PGP keyserver using Rocket
 
-[![Build Status](https://travis-ci.org/chocol4te/rocket_keyserver.svg?branch=master)](https://travis-ci.org/chocol4te/rocket_keyserver) [![Size](https://img.shields.io/microbadger/image-size/chocol4te/rocket_keyserver.svg)](https://hub.docker.com/r/chocol4te/rocket_keyserver/) [![Layers](https://img.shields.io/microbadger/layers/chocol4te/rocket_keyserver.svg)](https://hub.docker.com/r/chocol4te/rocket_keyserver/)
+[![Build Status](https://travis-ci.org/chocol4te/rocket_keyserver.svg?branch=master)](https://travis-ci.org/chocol4te/rocket_keyserver) [![Size](https://img.shields.io/microbadger/image-size/chocol4te/rocket_keyserver.svg)](https://microbadger.com/images/chocol4te/rocket_keyserver) [![Layers](https://img.shields.io/microbadger/layers/chocol4te/rocket_keyserver.svg)](https://microbadger.com/images/chocol4te/rocket_keyserver)
 
 ## TODO
 
