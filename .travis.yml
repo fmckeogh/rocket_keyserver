@@ -30,6 +30,7 @@ before_install:
 - ./configure
 - make
 - sudo make install
+- cd ..
 
 script:
   - cargo fmt --all -- --check

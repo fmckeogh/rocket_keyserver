@@ -1,0 +1,15 @@
+version: '3'
+services:
+  main:
+    #build: .
+    image: 11649096a24e
+    links:
+    - db
+    ports:
+      - 80:80
+      - 443:443
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password

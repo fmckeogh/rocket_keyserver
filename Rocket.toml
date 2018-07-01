@@ -1,0 +1,16 @@
+[development]
+address = "localhost"
+port = 8000
+workers = 2
+log = "normal"
+limits = { forms = 32768 }
+# tls = { certs = "/path/to/certs.pem", key = "/path/to/key.pem" }
+
+[production]
+address = "0.0.0.0"
+port = 80
+workers = 2
+log = "normal"
+secret_key = "0aaYKAi2woqxk7IIDa06Sk5HMnG2RcRBZYIY0d5OMyc="
+limits = { forms = 32768 }
+# tls = { certs = "/path/to/certs.pem", key = "/path/to/key.pem" }
