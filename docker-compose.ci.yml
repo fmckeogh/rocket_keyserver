@@ -1,7 +1,7 @@
 version: '3'
 services:
   main:
-    image: chocol4te/rocket_keyserver
+    build: .
     links:
     - db
     ports:
