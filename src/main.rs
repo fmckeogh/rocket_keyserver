@@ -46,11 +46,8 @@ fn index() -> &'static str {
 fn upload(data: Data, connection: DbConn) -> Result<String, Failure> {
     let mut key_string = String::new();
 
-    match data.open().read_to_string(&mut key_string) {
-        Ok(_) => (),
-        Err(_) => {
-            return Err(Failure(Status::BadRequest));
-        }
+    if data.open().read_to_string(&mut key_string).is_err() {
+        return Err(Failure(Status::BadRequest));
     };
 
     let tpk = match openpgp::TPK::from_reader(armored!(key_string)) {
@@ -61,11 +58,8 @@ fn upload(data: Data, connection: DbConn) -> Result<String, Failure> {
     };
 
     let mut tpk_serialized = Vec::new();
-    match tpk.serialize(&mut tpk_serialized) {
-        Ok(_) => (),
-        Err(_) => {
-            return Err(Failure(Status::InternalServerError));
-        }
+    if tpk.serialize(&mut tpk_serialized).is_err() {
+        return Err(Failure(Status::InternalServerError));
     };
 
     let pgpkey = Key {
@@ -75,9 +69,7 @@ fn upload(data: Data, connection: DbConn) -> Result<String, Failure> {
 
     match db::insert(pgpkey, &connection) {
         Ok(key) => Ok(["/key/", hex::encode(key.fingerprint).as_str()].concat()),
-        Err(_) => {
-            return Err(Failure(Status::InternalServerError));
-        }
+        Err(_) => Err(Failure(Status::InternalServerError)),
     }
 }
 
