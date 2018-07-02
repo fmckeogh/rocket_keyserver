@@ -1,6 +1,6 @@
 table! {
     keys (fingerprint) {
-        fingerprint -> Bpchar,
-        pgpkey -> Text,
+        fingerprint -> Bytea,
+        pgpkey -> Bytea,
     }
 }

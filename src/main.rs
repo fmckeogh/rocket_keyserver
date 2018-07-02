@@ -45,17 +45,14 @@ fn upload(data: Data, connection: DbConn) -> io::Result<String> {
     let mut key_string = String::new();
     data.open().read_to_string(&mut key_string)?;
 
-    let tpk = openpgp::TPK::from_reader(armored!(key_string)).unwrap();
-
-    // Check if already exists
-    // If it does check signatures
+    let tpk = openpgp::TPK::from_reader(armored!(key_string)).unwrap(); // error 400
 
     let mut tpk_serialized = Vec::new();
     tpk.serialize(&mut tpk_serialized).unwrap();
 
     let pgpkey = Key {
-        fingerprint: tpk.fingerprint().to_hex(),
-        pgpkey: hex::encode(tpk_serialized),
+        fingerprint: tpk.fingerprint().as_slice().to_vec(),
+        pgpkey: tpk_serialized,
     };
 
     db::insert(pgpkey, &connection).unwrap();
@@ -65,9 +62,12 @@ fn upload(data: Data, connection: DbConn) -> io::Result<String> {
 
 #[get("/key/<fingerprint>")]
 fn retrieve(fingerprint: String, connection: DbConn) -> io::Result<String> {
-    let pgpkey_hex = db::get(fingerprint, &connection).unwrap().pgpkey;
 
-    let tpk = openpgp::TPK::from_bytes(&hex::decode(pgpkey_hex).unwrap()).unwrap();
+    let pgpkey = db::get(hex::decode(fingerprint).unwrap(), &connection)
+        .unwrap() // error 404
+        .pgpkey;
+
+    let tpk = openpgp::TPK::from_bytes(&pgpkey).unwrap();
 
     let mut key_output = String::new();
 
@@ -150,7 +150,7 @@ mod test {
         ).expect("valid rocket instance");
 
         db::_delete(
-            _UPLOAD_TEST_FINGERPRINT.to_string(),
+            hex::decode(_UPLOAD_TEST_FINGERPRINT).unwrap(),
             &init_pool().get().unwrap(),
         ).unwrap();
 
@@ -160,7 +160,7 @@ mod test {
         assert_eq!(response.body_string(), Some(_UPLOAD_TEST_URL.to_string()));
 
         db::_delete(
-            _UPLOAD_TEST_FINGERPRINT.to_string(),
+            hex::decode(_UPLOAD_TEST_FINGERPRINT).unwrap(),
             &init_pool().get().unwrap(),
         ).unwrap();
     }
@@ -200,7 +200,7 @@ mod test {
         ).expect("valid rocket instance");
 
         db::_delete(
-            _RETRIEVE_TEST_FINGERPRINT.to_string(),
+            hex::decode(_RETRIEVE_TEST_FINGERPRINT).unwrap(),
             &init_pool().get().unwrap(),
         ).unwrap();
 
@@ -217,7 +217,7 @@ mod test {
         );
 
         db::_delete(
-            _RETRIEVE_TEST_FINGERPRINT.to_string(),
+            hex::decode(_RETRIEVE_TEST_FINGERPRINT).unwrap(),
             &init_pool().get().unwrap(),
         ).unwrap();
     }

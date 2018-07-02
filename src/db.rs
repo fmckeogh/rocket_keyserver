@@ -12,8 +12,8 @@ use schema::keys;
 
 #[derive(Queryable, AsChangeset, Serialize, Deserialize, Insertable)]
 pub struct Key {
-    pub fingerprint: String,
-    pub pgpkey: String,
+    pub fingerprint: Vec<u8>,
+    pub pgpkey: Vec<u8>,
 }
 
 type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
@@ -53,7 +53,7 @@ pub fn _all(connection: &PgConnection) -> QueryResult<Vec<Key>> {
     keys::table.load::<Key>(&*connection)
 }
 
-pub fn get(fingerprint: String, connection: &PgConnection) -> QueryResult<Key> {
+pub fn get(fingerprint: Vec<u8>, connection: &PgConnection) -> QueryResult<Key> {
     keys::table.find(fingerprint).get_result::<Key>(connection)
 }
 
@@ -63,12 +63,12 @@ pub fn insert(key: Key, connection: &PgConnection) -> QueryResult<Key> {
         .get_result(connection)
 }
 
-pub fn _update(fingerprint: String, key: Key, connection: &PgConnection) -> QueryResult<Key> {
+pub fn _update(fingerprint: Vec<u8>, key: Key, connection: &PgConnection) -> QueryResult<Key> {
     diesel::update(keys::table.find(fingerprint))
         .set(&key)
         .get_result(connection)
 }
 
-pub fn _delete(fingerprint: String, connection: &PgConnection) -> QueryResult<usize> {
+pub fn _delete(fingerprint: Vec<u8>, connection: &PgConnection) -> QueryResult<usize> {
     diesel::delete(keys::table.find(fingerprint)).execute(connection)
 }
