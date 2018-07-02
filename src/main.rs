@@ -17,6 +17,8 @@ mod consts;
 mod db;
 mod schema;
 
+use rocket::response::status;
+use rocket::response::Failure;
 use rocket::Data;
 use std::fmt::Write;
 use std::io;
@@ -46,6 +48,7 @@ fn upload(data: Data, connection: DbConn) -> io::Result<String> {
     data.open().read_to_string(&mut key_string)?;
 
     let tpk = openpgp::TPK::from_reader(armored!(key_string)).unwrap(); // error 400
+    let fingerprint = tpk.fingerprint().as_slice().to_vec();
 
     let mut tpk_serialized = Vec::new();
     tpk.serialize(&mut tpk_serialized).unwrap();
@@ -62,9 +65,8 @@ fn upload(data: Data, connection: DbConn) -> io::Result<String> {
 
 #[get("/key/<fingerprint>")]
 fn retrieve(fingerprint: String, connection: DbConn) -> io::Result<String> {
-
     let pgpkey = db::get(hex::decode(fingerprint).unwrap(), &connection)
-        .unwrap() // error 404
+        .unwrap()
         .pgpkey;
 
     let tpk = openpgp::TPK::from_bytes(&pgpkey).unwrap();
