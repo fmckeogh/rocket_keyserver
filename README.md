@@ -9,12 +9,13 @@
 
 `cargo run` compiles and runs in a development configuration on https://localhost:80.
 
-## TODO
+## Todo
 
-[ ] Better error handling!!
-[ ] Implement multistage Docker builds for reasonable image size (Executable is 2.8MB so a several GB image is laughable)
-[ ] Write better tests, current ones not extensive or specific enough
-[ ] Write benchmarks to ensure no performance regressions occur
+- [x] Implement multistage Docker builds for reasonable image size
+- [ ] Better error handling
+- [ ] Write better internal tests, current ones quite poor
+- [ ] Write `docker-compose` black box tests
+- [ ] Write benchmarks to ensure no performance regressions occur
 
 ## Contributing
 
