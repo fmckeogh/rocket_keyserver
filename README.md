@@ -12,7 +12,7 @@
 ## Todo
 
 - [x] Implement multistage Docker builds for reasonable image size
-- [ ] Better error handling
+- [x] Better error handling
 - [ ] Write better internal tests, current ones quite poor
 - [ ] Write `docker-compose` black box tests
 - [ ] Write benchmarks to ensure no performance regressions occur
