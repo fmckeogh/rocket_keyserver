@@ -5,14 +5,14 @@
 
 ## Usage
 
-`docker-compose up` pulls the latest image and deploys alongside a PostgresQL container, running on ports 80 and 443.
+`docker-compose up` pulls the latest image and deploys alongside a PostgreSQL container, running on ports 80 and 443.
 
-`cargo run` compiles and runs in a development configuration on https://localhost:80.
+`cargo run` compiles and runs in a development configuration on https://localhost:8000. `DATABASE_URL` must be set to a valid PostgreSQL instance.
 
 ## Todo
 
 - [x] Implement multistage Docker builds for reasonable image size
-- [ ] Better error handling
+- [x] Better error handling
 - [ ] Write better internal tests, current ones quite poor
 - [ ] Write `docker-compose` black box tests
 - [ ] Write benchmarks to ensure no performance regressions occur
