@@ -17,12 +17,12 @@ mod consts;
 mod db;
 mod schema;
 
-use rocket::response::status;
+use rocket::http::Status;
 use rocket::response::Failure;
 use rocket::Data;
 use std::fmt::Write;
-use std::io;
 use std::io::Read;
+use std::result::Result;
 use std::str;
 
 use db::*;
@@ -43,33 +43,73 @@ fn index() -> &'static str {
 }
 
 #[post("/", data = "<data>")]
-fn upload(data: Data, connection: DbConn) -> io::Result<String> {
+fn upload(data: Data, connection: DbConn) -> Result<String, Failure> {
     let mut key_string = String::new();
-    data.open().read_to_string(&mut key_string)?;
 
-    let tpk = openpgp::TPK::from_reader(armored!(key_string)).unwrap(); // error 400
-    let fingerprint = tpk.fingerprint().as_slice().to_vec();
+    match data.open().read_to_string(&mut key_string) {
+        Ok(_) => (),
+        Err(_) => {
+            return Err(Failure(Status::BadRequest));
+        }
+    };
+
+    let tpk = match openpgp::TPK::from_reader(armored!(key_string)) {
+        Ok(tpk) => tpk,
+        Err(_) => {
+            return Err(Failure(Status::BadRequest));
+        }
+    };
 
     let mut tpk_serialized = Vec::new();
-    tpk.serialize(&mut tpk_serialized).unwrap();
+    match tpk.serialize(&mut tpk_serialized) {
+        Ok(_) => (),
+        Err(_) => {
+            return Err(Failure(Status::InternalServerError));
+        }
+    };
 
     let pgpkey = Key {
         fingerprint: tpk.fingerprint().as_slice().to_vec(),
         pgpkey: tpk_serialized,
     };
 
-    db::insert(pgpkey, &connection).unwrap();
-
-    Ok(["/key/", tpk.fingerprint().to_hex().as_str()].concat())
+    match db::insert(pgpkey, &connection) {
+        Ok(key) => Ok(["/key/", hex::encode(key.fingerprint).as_str()].concat()),
+        Err(_) => {
+            return Err(Failure(Status::InternalServerError));
+        }
+    }
 }
 
 #[get("/key/<fingerprint>")]
-fn retrieve(fingerprint: String, connection: DbConn) -> io::Result<String> {
-    let pgpkey = db::get(hex::decode(fingerprint).unwrap(), &connection)
-        .unwrap()
-        .pgpkey;
+fn retrieve(fingerprint: String, connection: DbConn) -> Result<String, Failure> {
+    if fingerprint.len() != 40 {
+        return Err(Failure(Status::BadRequest));
+    }
 
-    let tpk = openpgp::TPK::from_bytes(&pgpkey).unwrap();
+    let fingerprint_bytes = match hex::decode(fingerprint) {
+        Ok(b) => b,
+        Err(_) => {
+            return Err(Failure(Status::BadRequest));
+        }
+    };
+
+    let pgpkey: Vec<u8> = match db::get(fingerprint_bytes, &connection) {
+        Ok(key) => key.pgpkey,
+        Err(diesel::result::Error::NotFound) => {
+            return Err(Failure(Status::NotFound));
+        }
+        Err(_) => {
+            return Err(Failure(Status::InternalServerError));
+        }
+    };
+
+    let tpk = match openpgp::TPK::from_bytes(&pgpkey) {
+        Ok(tpk) => tpk,
+        Err(_) => {
+            return Err(Failure(Status::InternalServerError));
+        }
+    };
 
     let mut key_output = String::new();
 
@@ -222,5 +262,35 @@ mod test {
             hex::decode(_RETRIEVE_TEST_FINGERPRINT).unwrap(),
             &init_pool().get().unwrap(),
         ).unwrap();
+    }
+
+    #[test]
+    fn retrieve_test_bad_key() {
+        let client = Client::new(
+            rocket::ignite()
+                .manage(init_pool())
+                .mount("/", routes![index, upload, retrieve]),
+        ).expect("valid rocket instance");
+
+        let response = client
+            .get(URI::new("/key/notarealkeyforobviousreasons"))
+            .dispatch();
+
+        assert_eq!(response.status(), Status::BadRequest);
+    }
+
+    #[test]
+    fn retrieve_test_no_key() {
+        let client = Client::new(
+            rocket::ignite()
+                .manage(init_pool())
+                .mount("/", routes![index, upload, retrieve]),
+        ).expect("valid rocket instance");
+
+        let response = client
+            .get(URI::new("/key/123456789ABCDEF123456789ABCDEF123456789A"))
+            .dispatch();
+
+        assert_eq!(response.status(), Status::NotFound);
     }
 }
