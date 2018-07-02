@@ -11,8 +11,6 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
 RUN /root/.cargo/bin/rustup default nightly
 RUN /root/.cargo/bin/cargo install diesel_cli --no-default-features --features postgres
 
-ENV DATABASE_URL postgres://postgres:password@db/keys
-
 #RUN USER=root /root/.cargo/bin/cargo new --bin rocket_keyserver
 WORKDIR /rocket_keyserver
 
@@ -28,7 +26,8 @@ RUN /root/.cargo/bin/cargo build --release
 
 FROM ubuntu:bionic
 
-COPY --from=build /rocket_keyserver/ /
+COPY --from=build /rocket_keyserver/Cargo.toml /
+COPY --from=build /rocket_keyserver/Rocket.toml /
 COPY --from=build /rocket_keyserver/target/release/rocket_keyserver /rocket_keyserver
 COPY --from=build /root/.cargo/bin/diesel /diesel
 
