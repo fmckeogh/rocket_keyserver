@@ -10,13 +10,14 @@ extern crate r2d2_diesel;
 #[macro_use]
 extern crate serde_derive;
 #[macro_use]
-extern crate openpgp;
+extern crate pgp;
 extern crate hex;
 
 mod consts;
 mod db;
 mod schema;
 
+use pgp::{Key, PublicKey};
 use rocket::http::Status;
 use rocket::response::Failure;
 use rocket::Data;
@@ -25,7 +26,8 @@ use std::io::Read;
 use std::result::Result;
 use std::str;
 
-use db::*;
+use db::DbConn;
+use db::init_pool;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -50,21 +52,23 @@ fn upload(data: Data, connection: DbConn) -> Result<String, Failure> {
         return Err(Failure(Status::BadRequest));
     };
 
-    let tpk = match openpgp::TPK::from_reader(armored!(key_string)) {
-        Ok(tpk) => tpk,
+    let key = match PublicKey::from_string(&key_string) {
+        Ok(key) => key,
         Err(_) => {
             return Err(Failure(Status::BadRequest));
         }
     };
 
+    /*
     let mut tpk_serialized = Vec::new();
     if tpk.serialize(&mut tpk_serialized).is_err() {
         return Err(Failure(Status::InternalServerError));
     };
+    */
 
-    let pgpkey = Key {
-        fingerprint: tpk.fingerprint().as_slice().to_vec(),
-        pgpkey: tpk_serialized,
+    let pgpkey = db::Key {
+        fingerprint: key.fingerprint(),
+        pgpkey: key_string.into_bytes(),
     };
 
     match db::insert(pgpkey, &connection) {
@@ -96,6 +100,8 @@ fn retrieve(fingerprint: String, connection: DbConn) -> Result<String, Failure> 
         }
     };
 
+    Ok(String::from_utf8(pgpkey).unwrap())
+    /*
     let tpk = match openpgp::TPK::from_bytes(&pgpkey) {
         Ok(tpk) => tpk,
         Err(_) => {
@@ -133,6 +139,7 @@ fn retrieve(fingerprint: String, connection: DbConn) -> Result<String, Failure> 
     }
 
     Ok(key_output)
+    */
 }
 
 fn main() {

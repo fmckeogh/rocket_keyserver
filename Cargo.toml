@@ -22,6 +22,6 @@ features = ["postgres", "r2d2"]
 version = "0.16.1"
 features = ["postgres"]
 
-[dependencies.openpgp]
-git = "https://gitlab.com/sequoia-pgp/sequoia.git"
-rev = "59642412"
+[dependencies.pgp]
+git = "https://github.com/chocol4te/pgp.git"
+rev = "d760044"
