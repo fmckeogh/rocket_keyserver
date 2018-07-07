@@ -26,8 +26,8 @@ use std::io::Read;
 use std::result::Result;
 use std::str;
 
-use db::DbConn;
 use db::init_pool;
+use db::DbConn;
 
 #[get("/")]
 fn index() -> &'static str {
