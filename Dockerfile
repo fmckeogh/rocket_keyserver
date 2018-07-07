@@ -2,9 +2,9 @@ FROM clux/muslrust as build
 
 RUN cd / && git clone https://github.com/diesel-rs/diesel.git && cd diesel/diesel_cli && cargo build --release --target=x86_64-unknown-linux-musl --no-default-features --features postgres
 RUN x86_64-linux-gnu-strip /diesel/target/x86_64-unknown-linux-musl/release/diesel
-RUN USER=root cargo new --bin prebuild && mv prebuild/* . && rm -r prebuild
-COPY ./Cargo.toml .
-RUN cargo build --release
+#RUN USER=root cargo new --bin prebuild && mv prebuild/* . && rm -r prebuild
+#COPY ./Cargo.toml .
+#RUN cargo build --release
 
 COPY . .
 RUN cargo build --release
