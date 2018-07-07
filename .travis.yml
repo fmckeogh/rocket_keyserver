@@ -12,7 +12,6 @@ before_install:
 
 script:
   - cargo fmt --all -- --check
-  - cargo clippy
   - cargo check
   - ./.docker.ci.sh
 #  - cargo test
