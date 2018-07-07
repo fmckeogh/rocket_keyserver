@@ -5,32 +5,10 @@ rust:
 - nightly
 
 services:
-  - postgresql
   - docker
-
-addons:
-  apt:
-    packages:
-    - git
-    - clang
-    - make
-    - pkg-config
-    - libssl-dev
-    - capnproto
-    - libsqlite3-dev
-    - libpq-dev
 
 before_install:
 - rustup component add rustfmt-preview
-- cargo install clippy --force
-- git clone https://git.lysator.liu.se/nettle/nettle.git
-- cd nettle
-- git checkout 0d993096
-- ./.bootstrap
-- ./configure
-- make
-- sudo make install
-- cd ..
 
 script:
   - cargo fmt --all -- --check
