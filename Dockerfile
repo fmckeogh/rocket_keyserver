@@ -1,45 +1,30 @@
-FROM ubuntu:bionic as build
+FROM clux/muslrust as build
 
-#RUN apt-get update
-#RUN apt install -y gnupg
-#RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
-#RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+RUN cd / && git clone https://github.com/diesel-rs/diesel.git && cd diesel/diesel_cli && cargo build --release --target=x86_64-unknown-linux-musl --no-default-features --features postgres
+RUN x86_64-linux-gnu-strip /diesel/target/x86_64-unknown-linux-musl/release/diesel
+#RUN USER=root cargo new --bin prebuild && mv prebuild/* . && rm -r prebuild
+#COPY ./Cargo.toml .
+#RUN cargo build --release
 
-RUN apt update
-RUN apt-get install -y git clang make pkg-config nettle-dev libssl-dev capnproto libsqlite3-dev curl libpq-dev software-properties-common musl-tools
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
-RUN /root/.cargo/bin/rustup default nightly
-RUN /root/.cargo/bin/cargo install diesel_cli --no-default-features --features postgres
-
-#RUN USER=root /root/.cargo/bin/cargo new --bin rocket_keyserver
-WORKDIR /rocket_keyserver
-
-#COPY ./Cargo.lock ./Cargo.lock
-#COPY ./Cargo.toml ./Cargo.toml
-
-#RUN /root/.cargo/bin/cargo build --release
-#RUN rm -r src
-
-COPY ./ ./
-RUN /root/.cargo/bin/cargo build --release
+COPY . .
+RUN cargo build --release
+RUN x86_64-linux-gnu-strip /volume/target/x86_64-unknown-linux-musl/release/rocket_keyserver
 
 
-FROM ubuntu:bionic
-
-COPY --from=build /rocket_keyserver/Cargo.toml /
-COPY --from=build /rocket_keyserver/Rocket.toml /
-COPY --from=build /rocket_keyserver/target/release/rocket_keyserver /rocket_keyserver
-COPY --from=build /root/.cargo/bin/diesel /diesel
-
-ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh wait-for-it.sh
-RUN chmod +x wait-for-it.sh
-
-RUN apt-get update
-RUN apt-get install -y nettle-dev libpq-dev
+FROM alpine:edge
 
 EXPOSE 80
 EXPOSE 443
 
+COPY ./Cargo.toml /
+COPY ./Rocket.toml /
+COPY --from=build /volume/target/x86_64-unknown-linux-musl/release/rocket_keyserver /rocket_keyserver
+COPY --from=build /diesel/target/x86_64-unknown-linux-musl/release/diesel /diesel
+
+ADD https://github.com/eficode/wait-for/raw/master/wait-for /wait-for
+RUN chmod +x /wait-for
+
 ENV ROCKET_ENV prod
 ENV DATABASE_URL postgres://postgres:password@db/keys
-CMD ["sh", "-c", "./wait-for-it.sh db:5432 -- /diesel setup && /rocket_keyserver"]
+
+CMD ["sh", "-c", "/wait-for db:5432 -- /diesel setup && /rocket_keyserver"]
