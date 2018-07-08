@@ -9,9 +9,8 @@ extern crate r2d2;
 extern crate r2d2_diesel;
 #[macro_use]
 extern crate serde_derive;
-#[macro_use]
-extern crate pgp;
 extern crate hex;
+extern crate pgp;
 
 mod consts;
 mod db;
@@ -21,7 +20,6 @@ use pgp::{Key, PublicKey};
 use rocket::http::Status;
 use rocket::response::Failure;
 use rocket::Data;
-use std::fmt::Write;
 use std::io::Read;
 use std::result::Result;
 use std::str;

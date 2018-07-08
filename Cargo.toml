@@ -9,9 +9,9 @@ rocket_codegen = "0.3.14"
 time = "0.1.40"
 r2d2 = "0.8.2"
 r2d2-diesel = "1.0.0"
-serde = "1.0.67"
+serde = "1.0.70"
 dotenv = "0.13.0"
-serde_derive = "1.0.67"
+serde_derive = "1.0.70"
 hex = "0.3.2"
 
 [dependencies.diesel]
@@ -23,5 +23,5 @@ version = "0.16.1"
 features = ["postgres"]
 
 [dependencies.pgp]
-git = "https://github.com/chocol4te/pgp.git"
-rev = "d760044"
+git = "https://github.com/dignifiedquire/pgp.git"
+rev = "592ffbc"
